@@ -3,12 +3,13 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@TeleOp(name = "Main", group = "TeleOp")
-public class Main extends OpMode {
+@TeleOp(name = "Main(non-reversed motor)", group = "TeleOp")
+public class Main3 extends OpMode {
 
-    DcMotor frontLeft, frontRight, rearLeft, rearRight, arm, slider;
+    DcMotor frontLeft, frontRight, rearLeft, rearRight, arm, arm2, slider;
     Servo wrist, claw;
     double wristPOS;
     int mode;
@@ -20,6 +21,7 @@ public class Main extends OpMode {
         rearLeft = hardwareMap.get(DcMotor.class, "rearLeft");
         rearRight = hardwareMap.get(DcMotor.class, "rearRight");
         arm = hardwareMap.get(DcMotor.class, "arm");
+        arm2 = hardwareMap.get(DcMotor.class, "arm2");
         slider = hardwareMap.get(DcMotor.class, "slider");
 
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
@@ -35,6 +37,8 @@ public class Main extends OpMode {
         wrist = hardwareMap.get(Servo.class, "wrist");
 
         claw = hardwareMap.get(Servo.class, "claw");
+        wrist.setDirection(Servo.Direction.REVERSE);
+
 
         wristPOS = 0.3;
         wrist.setPosition(0.42);
@@ -72,19 +76,27 @@ public class Main extends OpMode {
         if(mode == 1) {
             if (gamepad2.left_stick_y == 0) {
                 arm.setPower(0.1);
+                arm2.setPower(0.1);
             } else if (gamepad2.left_stick_y < 0) {
-                arm.setPower(gamepad2.left_stick_y * 0.08);
+                arm.setPower(gamepad2.left_stick_y * 0.05);
+                arm2.setPower(gamepad2.left_stick_y * 0.05);
+
             } else if (gamepad2.left_stick_y > 0) {
-                arm.setPower(gamepad2.left_stick_y * 0.8);
+                arm.setPower(gamepad2.left_stick_y * 0.6);
+                arm2.setPower(gamepad2.left_stick_y * 0.6);
+
             }
         }
 
         if(mode == 2) {
             if (gamepad2.left_stick_y == 0) {
                 arm.setPower(0.1);
+                arm2.setPower(0.1);
             } else if (gamepad2.left_stick_y < 0) {
                 arm.setPower(gamepad2.left_stick_y * 0.6);
+                arm.setPower(gamepad2.left_stick_y * 0.6);
             } else if (gamepad2.left_stick_y > 0) {
+                arm.setPower(gamepad2.left_stick_y * 0.8);
                 arm.setPower(gamepad2.left_stick_y * 0.8);
             }
         }
@@ -92,9 +104,9 @@ public class Main extends OpMode {
         if (gamepad2.y) mode = 2;
         if (gamepad2.b) mode = 1;
 
-       if(gamepad2.right_trigger != 0){
-           claw.setPosition(0.2);
-       }
+        if(gamepad2.right_trigger != 0){
+            claw.setPosition(0.2);
+        }
         if(gamepad2.right_trigger == 0){
             claw.setPosition(0);
         }
