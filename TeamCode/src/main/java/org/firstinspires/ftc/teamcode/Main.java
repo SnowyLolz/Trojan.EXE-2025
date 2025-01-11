@@ -107,7 +107,7 @@ public class Main extends OpMode {
         }
 
         telemetry.addData("Mod", mode);
-        telemetry.update();
+        telemetry.update();//l
     }
 
     @Override
