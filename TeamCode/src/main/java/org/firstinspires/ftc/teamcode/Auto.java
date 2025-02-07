@@ -4,117 +4,141 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 
 @Autonomous(name = "Auto", group = "Autonomous")
 public class Auto extends LinearOpMode {
 
-    // Drivetrain motors
-    private DcMotor frontLeft, frontRight, rearLeft, rearRight;
+    private DcMotor frontLeft, frontRight, rearLeft, rearRight,lift1, lift2;
 
-    // Auxiliary motors
-    private DcMotor slider, arm;
+    private Servo clawout, wrist;
 
-    // Odometry encoders
-    private DcMotor forwardEncoder, strafeEncoder;
+    private static final double COUNTS_PER_CM = 800;
 
-    // Gyro (IMU)
-    private BNO055IMU imu;
+    private static final double RAISE_PPR = 538;
 
-    // Encoder counts per cm
-    private static final double COUNTS_PER_CM = 625; // Adjust based on your encoder and wheel setup
-    private static final double ROTATION_GAIN = 0.02; // Tuning constant for rotation correction
+
+
 
     @Override
     public void runOpMode() {
-        // Initialize drivetrain motors
         frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
         frontRight = hardwareMap.get(DcMotor.class, "frontRight");
         rearLeft = hardwareMap.get(DcMotor.class, "rearLeft");
         rearRight = hardwareMap.get(DcMotor.class, "rearRight");
+        lift1 = hardwareMap.get(DcMotor.class, "lift1");
+        lift2 = hardwareMap.get(DcMotor.class, "lift2");
+        clawout = hardwareMap.get(Servo.class,"clawout");
+        wrist = hardwareMap.get(Servo.class,"wrist");
 
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rearLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rearRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lift1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lift2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
         rearLeft.setDirection(DcMotor.Direction.REVERSE);
+        lift1.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        // Initialize auxiliary motors
-        slider = hardwareMap.get(DcMotor.class, "slider");
-        arm = hardwareMap.get(DcMotor.class, "arm");
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rearLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        // Initialize odometry encoders
-        forwardEncoder = hardwareMap.get(DcMotor.class, "forwardEncoder");
-        strafeEncoder = hardwareMap.get(DcMotor.class, "strafeEncoder");
+        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rearLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        lift1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        lift2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        forwardEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        strafeEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        forwardEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        strafeEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        // Initialize IMU
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
-        imu.initialize(parameters);
-
-        // Wait for start
         waitForStart();
 
         if (opModeIsActive()) {
-            // Example usage of the functions
-            moveForward(20); // Move forward 50 cm
-            waitFor(2);
-            strafeRight(-30); // Strafe right 30 cm
-            moveForward(-10);
-            strafeRight(50);
+
+            raise(5);
+            moveForward(-22);
+            auxiliaryPowers(0.1,0.1);
+            sleep(2000);
+            lower(5);
+
         }
     }
 
-    // Function to move forward or backward
     private void moveForward(double distanceCm) {
         int targetCounts = (int) (distanceCm * COUNTS_PER_CM);
-        int startPosition = forwardEncoder.getCurrentPosition();
+        int startPosition = frontLeft.getCurrentPosition();
 
-        while (opModeIsActive() && Math.abs(forwardEncoder.getCurrentPosition() - startPosition) < Math.abs(targetCounts)) {
+        while (opModeIsActive() && Math.abs(frontLeft.getCurrentPosition() - startPosition) < Math.abs(targetCounts)) {
             double power = distanceCm > 0 ? 0.5 : -0.5;
             setMotorPowers(power, power, power, power);
-            telemetry.addData("Forward Distance", forwardEncoder.getCurrentPosition() - startPosition);
+            auxiliaryPowers(0.1,0.1);
+            telemetry.addData("Forward Distance", frontLeft.getCurrentPosition() - startPosition);
             telemetry.update();
         }
         stopMotors();
     }
 
-    // Function to strafe left or right
     private void strafeRight(double distanceCm) {
         int targetCounts = (int) (distanceCm * COUNTS_PER_CM);
-        int startPosition = strafeEncoder.getCurrentPosition();
+        int startPosition = frontRight.getCurrentPosition();
 
-        while (opModeIsActive() && Math.abs(strafeEncoder.getCurrentPosition() - startPosition) < Math.abs(targetCounts)) {
+        while (opModeIsActive() && Math.abs(frontRight.getCurrentPosition() - startPosition) < Math.abs(targetCounts)) {
             double power = distanceCm > 0 ? 0.5 : -0.5;
             setMotorPowers(power, -power, -power, power);
-            telemetry.addData("Strafe Distance", strafeEncoder.getCurrentPosition() - startPosition);
+            telemetry.addData("Strafe Distance", frontRight.getCurrentPosition() - startPosition);
             telemetry.update();
         }
         stopMotors();
     }
 
-    // Function to rotate clockwise or counterclockwise
-    private void rotate(double angleDegrees) {
-        double targetAngle = imu.getAngularOrientation().firstAngle + Math.toRadians(angleDegrees);
-        while (opModeIsActive() && Math.abs(imu.getAngularOrientation().firstAngle - targetAngle) > Math.toRadians(2)) {
-            double error = targetAngle - imu.getAngularOrientation().firstAngle;
-            double power = ROTATION_GAIN * error;
-            setMotorPowers(-power, power, -power, power);
-            telemetry.addData("Heading", imu.getAngularOrientation().firstAngle);
+    private void rotate(double distanceCm) {
+
+        int targetCounts = (int) (distanceCm * COUNTS_PER_CM);
+        int startPosition = rearLeft.getCurrentPosition();
+
+        while (opModeIsActive() && Math.abs(rearLeft.getCurrentPosition() - startPosition) < Math.abs(targetCounts)) {
+            double power = distanceCm > 0 ? 0.5 : -0.5;
+            setMotorPowers(power, -power, power, -power);
+            telemetry.addData("Rotation Distance", rearLeft.getCurrentPosition() - startPosition);
+            telemetry.update();
+        }
+
+        stopMotors();
+    }
+
+    private void raise(double distanceCm) {
+
+        int targetCounts = (int) (distanceCm * RAISE_PPR);
+        int startPosition = lift2.getCurrentPosition();
+
+        while (opModeIsActive() && Math.abs(lift2.getCurrentPosition() - startPosition) < Math.abs(targetCounts)) {
+
+            auxiliaryPowers(0.5,0.5);
+            telemetry.addData("Raise", lift2.getCurrentPosition() - startPosition);
             telemetry.update();
         }
         stopMotors();
     }
 
-    // Function to wait for a specified time
+    private void lower(double distanceCm) {
+
+        int targetCounts = (int) (distanceCm * RAISE_PPR);
+        int startPosition = lift2.getCurrentPosition();
+
+        while (opModeIsActive() && Math.abs(lift2.getCurrentPosition() - startPosition) < Math.abs(targetCounts)) {
+
+            auxiliaryPowers(-0.5,-0.5);
+            telemetry.addData("Lower", lift2.getCurrentPosition() - startPosition);
+            telemetry.update();
+        }
+        stopMotors();
+    }
+
+
     private void waitFor(double seconds) {
         double startTime = getRuntime();
         while (opModeIsActive() && getRuntime() - startTime < seconds) {
@@ -123,7 +147,6 @@ public class Auto extends LinearOpMode {
         }
     }
 
-    // Helper function to set motor powers
     private void setMotorPowers(double fl, double fr, double bl, double br) {
         frontLeft.setPower(fl);
         frontRight.setPower(fr);
@@ -131,8 +154,20 @@ public class Auto extends LinearOpMode {
         rearRight.setPower(br);
     }
 
-    // Helper function to stop all motors
+    private void auxiliaryPowers(double liftP, double lift2P){
+
+        lift1.setPower(liftP);
+        lift2.setPower(lift2P);
+
+    }
+
+    public void Servo(double power, long durationMs, double position) {
+        clawout.setPosition(position);
+        sleep(200);
+    }
+
     private void stopMotors() {
         setMotorPowers(0, 0, 0, 0);
+        auxiliaryPowers(0,0);
     }
 }

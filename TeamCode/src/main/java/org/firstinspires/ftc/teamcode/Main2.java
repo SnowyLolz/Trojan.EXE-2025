@@ -38,7 +38,6 @@ public class Main2 extends OpMode {
         wrist = hardwareMap.get(Servo.class, "wrist");
 
         claw = hardwareMap.get(Servo.class, "claw");
-        wrist.setDirection(Servo.Direction.REVERSE);
 
 
         wristPOS = 0.3;
@@ -76,15 +75,15 @@ public class Main2 extends OpMode {
 
         if(mode == 1) {
             if (gamepad2.left_stick_y == 0) {
-                arm.setPower(0.1);
-                arm2.setPower(0.1);
+                arm.setPower(0.15);
+                arm2.setPower(0.15);
             } else if (gamepad2.left_stick_y < 0) {
                 arm.setPower(gamepad2.left_stick_y * 0.05);
                 arm2.setPower(gamepad2.left_stick_y * 0.05);
 
             } else if (gamepad2.left_stick_y > 0) {
-                arm.setPower(gamepad2.left_stick_y * 0.6);
-                arm2.setPower(gamepad2.left_stick_y * 0.6);
+                arm.setPower(gamepad2.left_stick_y * 0.65);
+                arm2.setPower(gamepad2.left_stick_y * 0.65);
 
             }
         }

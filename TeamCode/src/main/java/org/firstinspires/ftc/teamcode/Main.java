@@ -3,15 +3,14 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name = "Main", group = "TeleOp")
 public class Main extends OpMode {
 
-    DcMotor frontLeft, frontRight, rearLeft, rearRight, arm, slider;
-    Servo wrist, claw;
-    double wristPOS;
-    int mode;
+    DcMotor frontLeft, frontRight, rearLeft, rearRight, lift1, lift2;
+    Servo wrist, ankle, extend1, extend2, clawout, clawin;
 
     @Override
     public void init() {
@@ -19,27 +18,36 @@ public class Main extends OpMode {
         frontRight = hardwareMap.get(DcMotor.class, "frontRight");
         rearLeft = hardwareMap.get(DcMotor.class, "rearLeft");
         rearRight = hardwareMap.get(DcMotor.class, "rearRight");
-        arm = hardwareMap.get(DcMotor.class, "arm");
-        slider = hardwareMap.get(DcMotor.class, "slider");
+        lift1 = hardwareMap.get(DcMotor.class, "lift1");
+        lift2 = hardwareMap.get(DcMotor.class, "lift2");
 
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
         rearLeft.setDirection(DcMotor.Direction.REVERSE);
+        lift2.setDirection(DcMotorSimple.Direction.REVERSE);
+
 
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rearLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rearRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        slider.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lift1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lift2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
 
         wrist = hardwareMap.get(Servo.class, "wrist");
+        clawout = hardwareMap.get(Servo.class, "clawout");
+        clawin = hardwareMap.get(Servo.class, "clawin");
+        ankle = hardwareMap.get(Servo.class,"ankle");
+        extend1 = hardwareMap.get(Servo.class,"extend1");
+        extend2 = hardwareMap.get(Servo.class,"extend2");
 
-        claw = hardwareMap.get(Servo.class, "claw");
 
-        wristPOS = 0.3;
-        wrist.setPosition(0.42);
-        claw.setPosition(0);
-        mode = 1;
+        wrist.setPosition(0);
+        clawout.setPosition(0);
+        clawin.setPosition(0);
+        ankle.setPosition(0.6);
+        extend1.setPosition(0);
+        extend2.setPosition(0.21);
     }
 
     @Override
@@ -67,47 +75,51 @@ public class Main extends OpMode {
         rearLeft.setPower(rearLeftPower);
         rearRight.setPower(rearRightPower);
 
-        slider.setPower(gamepad2.right_stick_y * .5);
-
-        if(mode == 1) {
-            if (gamepad2.left_stick_y == 0) {
-                arm.setPower(0.1);
-            } else if (gamepad2.left_stick_y < 0) {
-                arm.setPower(gamepad2.left_stick_y * 0.08);
-            } else if (gamepad2.left_stick_y > 0) {
-                arm.setPower(gamepad2.left_stick_y * 0.8);
-            }
-        }
-
-        if(mode == 2) {
-            if (gamepad2.left_stick_y == 0) {
-                arm.setPower(0.1);
-            } else if (gamepad2.left_stick_y < 0) {
-                arm.setPower(gamepad2.left_stick_y * 0.6);
-            } else if (gamepad2.left_stick_y > 0) {
-                arm.setPower(gamepad2.left_stick_y * 0.8);
-            }
-        }
-
-        if (gamepad2.y) mode = 2;
-        if (gamepad2.b) mode = 1;
+        lift1.setPower(gamepad2.left_stick_y * .5);
+        lift2.setPower(gamepad2.left_stick_y * .5);
 
        if(gamepad2.right_trigger != 0){
-           claw.setPosition(0.2);
+           clawout.setPosition(0.2);
        }
         if(gamepad2.right_trigger == 0){
-            claw.setPosition(0);
+            clawout.setPosition(0);
+        }
+
+        if(gamepad2.left_trigger != 0){
+            clawin.setPosition(0.2);
+        }
+        if(gamepad2.left_trigger == 0){
+            clawin.setPosition(0);
         }
 
         if (gamepad2.a){
-            wrist.setPosition(wristPOS);
+            wrist.setPosition(0.4);
         }
         if (gamepad2.x){
             wrist.setPosition(0);
         }
 
-        telemetry.addData("Mod", mode);
-        telemetry.update();
+        if (gamepad2.b){
+            ankle.setPosition(0.6);
+        }
+        if (gamepad2.y){
+            ankle.setPosition(0);
+        }
+
+        if(gamepad2.right_stick_y < 0){
+            extend1.setPosition(0.21);
+        }
+        if(gamepad2.right_stick_y >= 0){
+            extend1.setPosition(0);
+        }
+
+        if(gamepad2.right_stick_y < 0){
+            extend2.setPosition(0);
+        }
+        if(gamepad2.right_stick_y >= 0){
+            extend2.setPosition(0.21);
+        }
+
     }
 
     @Override
@@ -116,7 +128,8 @@ public class Main extends OpMode {
         frontRight.setPower(0);
         rearLeft.setPower(0);
         rearRight.setPower(0);
-        arm.setPower(0);
-        slider.setPower(0);
+        lift1.setPower(0);
+        lift2.setPower(0);
+
     }
 }
