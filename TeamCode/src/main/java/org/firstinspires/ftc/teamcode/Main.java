@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -10,7 +11,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class Main extends OpMode {
 
     DcMotor frontLeft, frontRight, rearLeft, rearRight, lift1, lift2;
-    Servo wrist, ankle, extend1, extend2, clawout, clawin;
+    Servo wrist, ankle, clawout, clawin;
+
+    CRServo extend1, extend2;
 
     @Override
     public void init() {
@@ -38,16 +41,16 @@ public class Main extends OpMode {
         clawout = hardwareMap.get(Servo.class, "clawout");
         clawin = hardwareMap.get(Servo.class, "clawin");
         ankle = hardwareMap.get(Servo.class,"ankle");
-        extend1 = hardwareMap.get(Servo.class,"extend1");
-        extend2 = hardwareMap.get(Servo.class,"extend2");
+        extend1 = hardwareMap.get(CRServo.class,"extend1");
+        extend2 = hardwareMap.get(CRServo.class,"extend2");
 
+        extend1.setDirection(CRServo.Direction.REVERSE);
 
         wrist.setPosition(0);
         clawout.setPosition(0);
         clawin.setPosition(0);
         ankle.setPosition(0.6);
-        extend1.setPosition(0);
-        extend2.setPosition(0.21);
+
     }
 
     @Override
@@ -107,18 +110,18 @@ public class Main extends OpMode {
         }
 
         if(gamepad2.right_stick_y < 0){
-            extend1.setPosition(0.21);
+            extend1.setPower(.8);
+            extend2.setPower(.8);
         }
-        if(gamepad2.right_stick_y >= 0){
-            extend1.setPosition(0);
+        if(gamepad2.right_stick_y == 0){
+            extend1.setPower(0);
+            extend2.setPower(0);
         }
 
-        if(gamepad2.right_stick_y < 0){
-            extend2.setPosition(0);
-        }
-        if(gamepad2.right_stick_y >= 0){
-            extend2.setPosition(0.21);
-        }
+       if(gamepad2.right_stick_y > 0){
+           extend1.setPower(-.8);
+           extend2.setPower(-.8);
+       }
 
     }
 
@@ -130,6 +133,7 @@ public class Main extends OpMode {
         rearRight.setPower(0);
         lift1.setPower(0);
         lift2.setPower(0);
-
+        extend1.setPower(0);
+        extend2.setPower(0);
     }
 }
