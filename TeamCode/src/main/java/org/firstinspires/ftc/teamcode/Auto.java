@@ -59,11 +59,15 @@ public class Auto extends LinearOpMode {
 
         if (opModeIsActive()) {
 
-            raise(5);
-            moveForward(-22);
-            auxiliaryPowers(0.1,0.1);
-            sleep(2000);
-            lower(5);
+            clawout.setPosition(0);
+            raise(4);
+            moveForward(-16);
+            sleep(500);
+            lower(1.3);
+            sleep(300);
+            clawout.setPosition(0.25);
+            sleep(500);
+            lower(3);
 
         }
     }
@@ -113,12 +117,12 @@ public class Auto extends LinearOpMode {
     private void raise(double distanceCm) {
 
         int targetCounts = (int) (distanceCm * RAISE_PPR);
-        int startPosition = lift2.getCurrentPosition();
+        int startPosition = lift1.getCurrentPosition();
 
-        while (opModeIsActive() && Math.abs(lift2.getCurrentPosition() - startPosition) < Math.abs(targetCounts)) {
+        while (opModeIsActive() && Math.abs(lift1.getCurrentPosition() - startPosition) < Math.abs(targetCounts)) {
 
             auxiliaryPowers(0.5,0.5);
-            telemetry.addData("Raise", lift2.getCurrentPosition() - startPosition);
+            telemetry.addData("Raise", lift1.getCurrentPosition() - startPosition);
             telemetry.update();
         }
         stopMotors();
@@ -127,12 +131,12 @@ public class Auto extends LinearOpMode {
     private void lower(double distanceCm) {
 
         int targetCounts = (int) (distanceCm * RAISE_PPR);
-        int startPosition = lift2.getCurrentPosition();
+        int startPosition = lift1.getCurrentPosition();
 
-        while (opModeIsActive() && Math.abs(lift2.getCurrentPosition() - startPosition) < Math.abs(targetCounts)) {
+        while (opModeIsActive() && Math.abs(lift1.getCurrentPosition() - startPosition) < Math.abs(targetCounts)) {
 
             auxiliaryPowers(-0.5,-0.5);
-            telemetry.addData("Lower", lift2.getCurrentPosition() - startPosition);
+            telemetry.addData("Lower", lift1.getCurrentPosition() - startPosition);
             telemetry.update();
         }
         stopMotors();
